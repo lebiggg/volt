@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ========================================================== -->
+    <!-- PERMISSIONS — chacune justifiée pour audit GrapheneOS       -->
+    <!-- ========================================================== -->
+
+    <!-- WebSocket UnifiedPush persistant (sortant uniquement) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Foreground Service typé data sync (Android 14+) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
+    <!-- Notif persistante FGS (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Special access — accordé via Paramètres → Apps → Accès à l'historique -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+                     tools:ignore="ProtectedPermissions" />
+
+    <!--
+        Permission legacy (Android ≤ 15) : `adb shell pm grant` fonctionnait
+        pour la voie réflexion setAppStandbyBucket. Sur Android 16+, le grant
+        est refusé ("not a changeable permission type") — la manipulation des
+        buckets passe alors exclusivement par Shizuku (UID shell).
+        Conservée pour la rétrocompatibilité des devices plus anciens.
+    -->
+    <uses-permission android:name="android.permission.CHANGE_APP_IDLE_STATE"
+                     tools:ignore="ProtectedPermissions" />
+
+    <!-- Lister les apps installées (écran Hibernate) -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+                     tools:ignore="QueryAllPackagesPermission" />
+
+    <!-- Whitelist Doze pour FGS longue durée -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <application
+        android:name=".VoltApplication"
+        android:label="Volt"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Volt"
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="34">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            Foreground Service typé "dataSync" :
+            justification = connexion WebSocket sortante persistante vers
+            le distributeur UnifiedPush choisi par l'utilisateur.
+        -->
+        <service
+            android:name=".BatteryCommandService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false" />
+
+        <!--
+            Quick Settings tile "Hiberner maintenant" — sweep à la demande.
+            exported=true requis : SystemUI doit pouvoir binder, protégé par
+            la permission système BIND_QUICK_SETTINGS_TILE.
+        -->
+        <service
+            android:name=".system.VoltTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_volt_notification"
+            android:label="Hiberner"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!--
+            Shizuku content provider — déclaré par la dépendance
+            dev.rikka.shizuku:provider. Permet à Shizuku de détecter Volt
+            et à Volt d'invoquer Shizuku.newProcess() en runtime.
+
+            multiprocess=false : on n'instancie qu'un seul provider par process.
+            exported=true : c'est Shizuku (l'app externe) qui doit pouvoir nous
+                            lire — restreint par signature au binder Shizuku.
+        -->
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:multiprocess="false"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL"
+            tools:ignore="ExportedContentProvider" />
+
+    </application>
+</manifest>
