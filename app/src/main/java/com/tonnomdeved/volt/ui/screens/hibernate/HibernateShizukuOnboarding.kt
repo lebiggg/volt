@@ -28,7 +28,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.tonnomdeved.volt.R
 import androidx.compose.ui.unit.dp
 import com.tonnomdeved.volt.data.hibernation.shizuku.ShizukuGateway
 
@@ -49,10 +51,9 @@ fun HibernateShizukuOnboarding(
 
     val (title, description, cta, action) = when (availability) {
         ShizukuGateway.Availability.NOT_INSTALLED -> StepConfig(
-            title = "Activer le niveau HARD",
-            description = "Shizuku permet à Volt de mettre en hibernation profonde " +
-                          "les apps les plus gourmandes, sans root. Disponible sur F-Droid.",
-            ctaLabel = "Installer Shizuku",
+            title = stringResource(R.string.shizuku_card_enable_hard),
+            description = stringResource(R.string.shizuku_card_not_installed_desc),
+            ctaLabel = stringResource(R.string.shizuku_card_install),
             action = {
                 runCatching {
                     val intent = Intent(Intent.ACTION_VIEW,
@@ -63,10 +64,9 @@ fun HibernateShizukuOnboarding(
             }
         )
         ShizukuGateway.Availability.INSTALLED_NOT_RUNNING -> StepConfig(
-            title = "Démarrer Shizuku",
-            description = "Shizuku est installé mais son service n'est pas démarré. " +
-                          "Ouvrez l'app et suivez la procédure ADB ou root.",
-            ctaLabel = "Ouvrir Shizuku",
+            title = stringResource(R.string.shizuku_card_start_title),
+            description = stringResource(R.string.shizuku_card_start_desc),
+            ctaLabel = stringResource(R.string.shizuku_card_open),
             action = {
                 runCatching {
                     val intent = context.packageManager
@@ -77,10 +77,9 @@ fun HibernateShizukuOnboarding(
             }
         )
         ShizukuGateway.Availability.NOT_GRANTED -> StepConfig(
-            title = "Autoriser Volt dans Shizuku",
-            description = "Shizuku tourne — il vous reste à autoriser Volt à utiliser " +
-                          "les commandes privilégiées.",
-            ctaLabel = "Demander l'autorisation",
+            title = stringResource(R.string.shizuku_card_grant_title),
+            description = stringResource(R.string.shizuku_card_grant_desc),
+            ctaLabel = stringResource(R.string.shizuku_card_request),
             action = {
                 runCatching { rikka.shizuku.Shizuku.requestPermission(SHIZUKU_REQUEST_CODE) }
             }
@@ -134,7 +133,7 @@ fun HibernateShizukuOnboarding(
                     onClick = { action(); onCheckAgain() },
                     modifier = Modifier.weight(1f)
                 ) { Text(cta) }
-                TextButton(onClick = onCheckAgain) { Text("Revérifier") }
+                TextButton(onClick = onCheckAgain) { Text(stringResource(R.string.shizuku_card_recheck)) }
             }
         }
     }

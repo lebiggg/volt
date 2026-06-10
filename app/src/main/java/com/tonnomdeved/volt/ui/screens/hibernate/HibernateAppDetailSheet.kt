@@ -31,7 +31,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.tonnomdeved.volt.R
 import androidx.compose.ui.unit.dp
 import com.tonnomdeved.volt.data.hibernation.HibernationLevel
 import com.tonnomdeved.volt.data.hibernation.nocivity.NocivityBreakdown
@@ -101,12 +104,12 @@ fun HibernateAppDetailSheet(
                     Spacer(Modifier.size(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text(
-                            text = "Application protégée",
+                            text = stringResource(R.string.app_protected),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = protectionLabel(reason),
+                            text = protectionLabel(LocalContext.current, reason),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -116,7 +119,7 @@ fun HibernateAppDetailSheet(
 
             // ----- Score breakdown ----- //
             Text(
-                text = "Score de nocivité : ${item.score.total} / 100",
+                text = stringResource(R.string.nocivity_score, item.score.total),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium
             )
@@ -124,7 +127,7 @@ fun HibernateAppDetailSheet(
 
             // ----- Niveaux ----- //
             Text(
-                text = "Niveau d'hibernation",
+                text = stringResource(R.string.hibernation_level),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium
             )
@@ -144,12 +147,12 @@ fun HibernateAppDetailSheet(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Épingler",
+                        text = stringResource(R.string.pin_title),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = "Protège manuellement cette app de toute hibernation auto.",
+                        text = stringResource(R.string.pin_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -167,7 +170,7 @@ fun HibernateAppDetailSheet(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !item.isProtected || selectedLevel == HibernationLevel.OFF
             ) {
-                Text("Appliquer")
+                Text(stringResource(R.string.apply))
             }
 
             Spacer(Modifier.height(16.dp))
@@ -178,11 +181,11 @@ fun HibernateAppDetailSheet(
 @Composable
 private fun ScoreBreakdown(score: NocivityBreakdown) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        ScoreRow("Inactivité",          score.inactivity,        30)
-        ScoreRow("Ratio background",    score.backgroundRatio,   25)
-        ScoreRow("Réveils CPU",         score.wakeups,           20)
-        ScoreRow("Réseau background",   score.networkBackground, 15)
-        ScoreRow("Impact batterie",     score.batteryImpact,     10)
+        ScoreRow(stringResource(R.string.comp_inactivity), score.inactivity,        30)
+        ScoreRow(stringResource(R.string.comp_background), score.backgroundRatio,   25)
+        ScoreRow(stringResource(R.string.comp_wakeups),    score.wakeups,           20)
+        ScoreRow(stringResource(R.string.comp_network),    score.networkBackground, 15)
+        ScoreRow(stringResource(R.string.comp_battery),    score.batteryImpact,     10)
     }
 }
 
@@ -243,14 +246,14 @@ private fun LevelOption(
         Spacer(Modifier.size(8.dp))
         Column(Modifier.weight(1f)) {
             Text(
-                text = levelLabel(level),
+                text = levelLabel(LocalContext.current, level),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Medium,
                 color = if (enabled) MaterialTheme.colorScheme.onSurface
                         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
             Text(
-                text = levelDescription(level),
+                text = stringResource(levelDescriptionRes(level)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -258,9 +261,9 @@ private fun LevelOption(
     }
 }
 
-private fun levelDescription(l: HibernationLevel): String = when (l) {
-    HibernationLevel.OFF    -> "Aucune restriction. L'app fonctionne normalement."
-    HibernationLevel.SOFT   -> "Bucket RESTRICTED. Aucun force-stop."
-    HibernationLevel.MEDIUM -> "RESTRICTED + force-stop quand l'écran s'éteint (Shizuku)."
-    HibernationLevel.HARD   -> "RESTRICTED + force-stop périodique toutes les 6h (Shizuku)."
+private fun levelDescriptionRes(l: HibernationLevel): Int = when (l) {
+    HibernationLevel.OFF    -> R.string.level_off_desc
+    HibernationLevel.SOFT   -> R.string.level_soft_desc
+    HibernationLevel.MEDIUM -> R.string.level_medium_desc
+    HibernationLevel.HARD   -> R.string.level_hard_desc
 }

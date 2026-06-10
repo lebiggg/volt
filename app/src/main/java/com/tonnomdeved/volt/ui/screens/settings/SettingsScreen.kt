@@ -25,8 +25,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.tonnomdeved.volt.R
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -81,57 +83,58 @@ fun SettingsScreen(
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        Text("Réglages", style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineMedium)
 
         // ---- Apparence ----
-        SettingsCard(title = "Apparence") {
-            Text("Thème", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+        SettingsCard(title = stringResource(R.string.settings_appearance)) {
+            Text(stringResource(R.string.settings_theme),
+                 style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 VoltPreferences.ThemeMode.entries.forEach { mode ->
                     androidx.compose.material3.FilterChip(
                         selected = theme == mode,
                         onClick = { viewModel.setTheme(mode) },
-                        label = { Text(themeLabel(mode)) }
+                        label = { Text(stringResource(themeLabelRes(mode))) }
                     )
                 }
             }
             Spacer(Modifier.height(12.dp))
             ToggleRow(
-                title = "Couleurs dynamiques",
-                subtitle = "Material You — suit le fond d'écran (Android 12+)",
+                title = stringResource(R.string.settings_dynamic_color),
+                subtitle = stringResource(R.string.settings_dynamic_color_desc),
                 checked = dynamic,
                 onChange = viewModel::setDynamic
             )
         }
 
         // ---- Seuils d'auto-hibernation ----
-        SettingsCard(title = "Seuils d'auto-hibernation") {
+        SettingsCard(title = stringResource(R.string.settings_thresholds)) {
             Text(
-                "Score de nocivité à partir duquel chaque niveau s'applique automatiquement.",
+                stringResource(R.string.settings_thresholds_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(12.dp))
-            ThresholdSlider("Soft",   soft,   0..100)   { viewModel.setThresholds(it, medium, hard) }
-            ThresholdSlider("Medium", medium, soft..100) { viewModel.setThresholds(soft, it, hard) }
-            ThresholdSlider("Hard",   hard,   medium..100) { viewModel.setThresholds(soft, medium, it) }
+            ThresholdSlider(stringResource(R.string.level_soft),   soft,   0..100)   { viewModel.setThresholds(it, medium, hard) }
+            ThresholdSlider(stringResource(R.string.level_medium), medium, soft..100) { viewModel.setThresholds(soft, it, hard) }
+            ThresholdSlider(stringResource(R.string.level_hard),   hard,   medium..100) { viewModel.setThresholds(soft, medium, it) }
         }
 
         // ---- Comportement ----
-        SettingsCard(title = "Comportement") {
+        SettingsCard(title = stringResource(R.string.settings_behavior)) {
             ToggleRow(
-                title = "Démarrer au démarrage",
-                subtitle = "Relance le service Volt après un redémarrage de l'appareil.",
+                title = stringResource(R.string.settings_boot_title),
+                subtitle = stringResource(R.string.settings_boot_desc),
                 checked = onBoot,
                 onChange = viewModel::setStartOnBoot
             )
         }
 
         // ---- À propos ----
-        SettingsCard(title = "À propos") {
-            InfoRow("Version", "0.2.0-alpha")
-            InfoRow("Licence", "GPL-3.0")
+        SettingsCard(title = stringResource(R.string.settings_about)) {
+            InfoRow(stringResource(R.string.settings_version), "0.3.0-alpha")
+            InfoRow(stringResource(R.string.settings_license), "GPL-3.0")
             Spacer(Modifier.height(8.dp))
             Row(
                 modifier = Modifier
@@ -140,7 +143,7 @@ fun SettingsScreen(
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Code source sur GitHub",
+                Text(stringResource(R.string.settings_source),
                      style = MaterialTheme.typography.titleMedium,
                      color = MaterialTheme.colorScheme.primary)
             }
@@ -201,8 +204,8 @@ private fun InfoRow(key: String, value: String) {
     }
 }
 
-private fun themeLabel(m: VoltPreferences.ThemeMode): String = when (m) {
-    VoltPreferences.ThemeMode.SYSTEM -> "Système"
-    VoltPreferences.ThemeMode.LIGHT  -> "Clair"
-    VoltPreferences.ThemeMode.DARK   -> "Sombre"
+private fun themeLabelRes(m: VoltPreferences.ThemeMode): Int = when (m) {
+    VoltPreferences.ThemeMode.SYSTEM -> R.string.theme_system
+    VoltPreferences.ThemeMode.LIGHT  -> R.string.theme_light
+    VoltPreferences.ThemeMode.DARK   -> R.string.theme_dark
 }

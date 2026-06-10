@@ -29,7 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import com.tonnomdeved.volt.R
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -55,13 +57,12 @@ fun PushConfigScreen(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Text(
-            text = "Serveur Push",
+            text = stringResource(R.string.push_title),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = "Renseignez l'URL WebSocket de votre distributeur UnifiedPush " +
-                   "(Gotify, Ntfy, NextPush…). TLS 1.3 requis.",
+            text = stringResource(R.string.push_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -70,15 +71,15 @@ fun PushConfigScreen(
             value = urlDraft,
             onValueChange = viewModel::onUrlChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("URL du serveur") },
-            placeholder = { Text("wss://push.exemple.org/ws") },
+            label = { Text(stringResource(R.string.push_url_label)) },
+            placeholder = { Text("wss://push.example.org/ws") },
             singleLine = true,
             shape = RoundedCornerShape(16.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
             isError = urlDraft.isNotEmpty() && !canSave,
             supportingText = {
                 if (urlDraft.isNotEmpty() && !canSave) {
-                    Text("L'URL doit commencer par wss://")
+                    Text(stringResource(R.string.push_url_error))
                 }
             }
         )
@@ -88,7 +89,7 @@ fun PushConfigScreen(
             enabled = canSave,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Enregistrer", style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.save), style = MaterialTheme.typography.labelLarge)
         }
 
         Spacer(Modifier.height(4.dp))
@@ -100,18 +101,21 @@ fun PushConfigScreen(
 @Composable
 private fun ConnectionStatusCard(status: VoltStateBus.PushStatus) {
     val (label, detail, color) = when (status) {
-        VoltStateBus.PushStatus.Connected    ->
-            Triple("Connecté",     "Tunnel WebSocket actif.",                SignalOk)
-        VoltStateBus.PushStatus.Connecting   ->
-            Triple("Connexion…",   "Négociation TLS en cours.",              SignalWarning)
-        VoltStateBus.PushStatus.Disconnected ->
-            Triple("Déconnecté",   "Aucune connexion active.",               SignalError)
-        is VoltStateBus.PushStatus.Backoff   ->
-            Triple("En attente",
-                   "Reconnexion dans ${status.nextRetryInSec}s (backoff exponentiel).",
-                   SignalWarning)
-        is VoltStateBus.PushStatus.Error     ->
-            Triple("Erreur",       status.message,                            SignalError)
+        VoltStateBus.PushStatus.Connected    -> Triple(
+            stringResource(R.string.push_status_connected),
+            stringResource(R.string.push_status_connected_desc), SignalOk)
+        VoltStateBus.PushStatus.Connecting   -> Triple(
+            stringResource(R.string.push_status_connecting),
+            stringResource(R.string.push_status_connecting_desc), SignalWarning)
+        VoltStateBus.PushStatus.Disconnected -> Triple(
+            stringResource(R.string.push_status_disconnected),
+            stringResource(R.string.push_status_disconnected_desc), SignalError)
+        is VoltStateBus.PushStatus.Backoff   -> Triple(
+            stringResource(R.string.push_status_waiting),
+            stringResource(R.string.push_status_waiting_desc, status.nextRetryInSec.toInt()),
+            SignalWarning)
+        is VoltStateBus.PushStatus.Error     -> Triple(
+            stringResource(R.string.push_status_error), status.message, SignalError)
     }
 
     val animatedColor by animateColorAsState(targetValue = color, label = "pushStatus")

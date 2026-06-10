@@ -49,6 +49,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -56,6 +58,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tonnomdeved.volt.R
 import com.tonnomdeved.volt.data.PermissionChecker
 import com.tonnomdeved.volt.data.hibernation.shizuku.ShizukuGateway
 import com.tonnomdeved.volt.ui.theme.SignalError
@@ -98,7 +101,7 @@ fun DashboardScreen(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Optimisation énergétique respectueuse de la vie privée.",
+                    text = stringResource(R.string.dashboard_tagline),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -106,7 +109,7 @@ fun DashboardScreen(
             androidx.compose.material3.IconButton(onClick = onOpenSettings) {
                 Icon(
                     imageVector = Icons.Outlined.Settings,
-                    contentDescription = "Réglages",
+                    contentDescription = stringResource(R.string.settings_title),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -130,9 +133,8 @@ fun DashboardScreen(
 
         StatTile(
             value = restrictedCount.toString(),
-            label = if (restrictedCount <= 1) "application restreinte"
-                    else "applications restreintes",
-            sub = "Économies actives via Deep Sleep"
+            label = pluralStringResource(R.plurals.restricted_apps, restrictedCount),
+            sub = stringResource(R.string.deep_sleep_savings)
         )
     }
 }
@@ -159,15 +161,14 @@ private fun OnboardingCard(status: PermissionChecker.PermissionStatus) {
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                text = "Configuration requise",
+                text = stringResource(R.string.setup_required),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Volt nécessite ces accès pour fonctionner pleinement. " +
-                       "Aucun ne quitte votre appareil.",
+                text = stringResource(R.string.setup_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -175,8 +176,8 @@ private fun OnboardingCard(status: PermissionChecker.PermissionStatus) {
 
             PermissionRow(
                 icon = Icons.Outlined.QueryStats,
-                title = "Accès à l'historique d'utilisation",
-                description = "Indispensable pour observer l'activité des apps en arrière-plan.",
+                title = stringResource(R.string.perm_usage_title),
+                description = stringResource(R.string.perm_usage_desc),
                 granted = status.hasUsageStats,
                 onAction = {
                     context.startActivity(PermissionChecker.usageStatsSettingsIntent())
@@ -185,8 +186,8 @@ private fun OnboardingCard(status: PermissionChecker.PermissionStatus) {
             DividerThin()
             PermissionRow(
                 icon = Icons.Outlined.BatteryFull,
-                title = "Ignorer l'optimisation de batterie",
-                description = "Empêche Android de tuer le service Volt après quelques heures.",
+                title = stringResource(R.string.perm_battery_title),
+                description = stringResource(R.string.perm_battery_desc),
                 granted = status.isIgnoringBatteryOptimizations,
                 onAction = {
                     context.startActivity(
@@ -197,8 +198,8 @@ private fun OnboardingCard(status: PermissionChecker.PermissionStatus) {
             DividerThin()
             PermissionRow(
                 icon = Icons.Outlined.Notifications,
-                title = "Notifications",
-                description = "Notification persistante du service (catégorie minimale).",
+                title = stringResource(R.string.perm_notif_title),
+                description = stringResource(R.string.perm_notif_desc),
                 granted = status.canPostNotifications,
                 onAction = {
                     notificationLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -207,25 +208,24 @@ private fun OnboardingCard(status: PermissionChecker.PermissionStatus) {
             DividerThin()
             // Sur Android 16, Shizuku est l'unique voie pour manipuler les
             // App Standby Buckets (le grant ADB CHANGE_APP_IDLE_STATE est mort).
-            // Le CTA s'adapte à l'état : installer → démarrer → autoriser.
             PermissionRow(
                 icon = Icons.Outlined.Bolt,
-                title = "Shizuku",
+                title = stringResource(R.string.shizuku_title),
                 description = when (status.shizuku) {
                     ShizukuGateway.Availability.NOT_INSTALLED ->
-                        "Requis pour l'hibernation. Disponible sur F-Droid, sans root."
+                        stringResource(R.string.shizuku_desc_not_installed)
                     ShizukuGateway.Availability.INSTALLED_NOT_RUNNING ->
-                        "Installé mais arrêté. Démarrez-le via le débogage sans fil."
+                        stringResource(R.string.shizuku_desc_not_running)
                     ShizukuGateway.Availability.NOT_GRANTED ->
-                        "En cours d'exécution — autorisez Volt à l'utiliser."
+                        stringResource(R.string.shizuku_desc_not_granted)
                     ShizukuGateway.Availability.READY ->
-                        "Opérationnel. L'hibernation est pleinement fonctionnelle."
+                        stringResource(R.string.shizuku_desc_ready)
                 },
                 granted = status.shizuku == ShizukuGateway.Availability.READY,
                 actionLabel = when (status.shizuku) {
-                    ShizukuGateway.Availability.NOT_INSTALLED         -> "Installer"
-                    ShizukuGateway.Availability.INSTALLED_NOT_RUNNING -> "Ouvrir"
-                    else                                              -> "Autoriser"
+                    ShizukuGateway.Availability.NOT_INSTALLED         -> stringResource(R.string.action_install)
+                    ShizukuGateway.Availability.INSTALLED_NOT_RUNNING -> stringResource(R.string.action_open)
+                    else                                              -> stringResource(R.string.action_authorize)
                 },
                 onAction = {
                     when (status.shizuku) {
@@ -256,7 +256,7 @@ private fun PermissionRow(
     title: String,
     description: String,
     granted: Boolean,
-    actionLabel: String = "Accorder",
+    actionLabel: String = stringResource(R.string.action_grant),
     onAction: () -> Unit
 ) {
     val statusColor by animateColorAsState(
@@ -354,13 +354,12 @@ private fun ServiceStatusCard(
             Spacer(Modifier.size(16.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    text = if (isRunning) "Service actif" else "Service inactif",
+                    text = stringResource(if (isRunning) R.string.service_active else R.string.service_inactive),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = if (isRunning) "Le moteur Volt protège votre batterie."
-                           else "Activez Volt pour commencer.",
+                    text = stringResource(if (isRunning) R.string.service_active_desc else R.string.service_inactive_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

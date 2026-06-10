@@ -48,11 +48,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tonnomdeved.volt.R
 import com.tonnomdeved.volt.data.hibernation.HibernationLevel
 import com.tonnomdeved.volt.data.hibernation.HibernationResult
 import com.tonnomdeved.volt.data.hibernation.nocivity.NocivityBreakdown
@@ -82,6 +85,7 @@ fun HibernateScreen(
 
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     var detailItem by remember { mutableStateOf<AppHibernationItem?>(null) }
 
@@ -97,14 +101,12 @@ fun HibernateScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "Hibernate",
+                    text = stringResource(R.string.tab_hibernate),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Restreint automatiquement les apps inutilisées. " +
-                           "Les notifications UnifiedPush réveillent les apps hibernées " +
-                           "à la livraison.",
+                    text = stringResource(R.string.hibernate_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -117,8 +119,8 @@ fun HibernateScreen(
                     viewModel.wakeAll { woke ->
                         scope.launch {
                             snackbarHost.showSnackbar(
-                                if (woke > 0) "$woke app(s) réveillée(s)"
-                                else "Aucune app à réveiller"
+                                if (woke > 0) context.getString(R.string.snack_woke, woke)
+                                else context.getString(R.string.snack_nothing_to_wake)
                             )
                         }
                     }
@@ -131,8 +133,8 @@ fun HibernateScreen(
                     viewModel.setAutoHibernation(on) { changed ->
                         if (on) scope.launch {
                             snackbarHost.showSnackbar(
-                                if (changed > 0) "Auto activée — $changed app(s) hibernée(s)"
-                                else "Auto activée"
+                                if (changed > 0) context.getString(R.string.snack_auto_on_changed, changed)
+                                else context.getString(R.string.snack_auto_on)
                             )
                         }
                     }
@@ -141,8 +143,8 @@ fun HibernateScreen(
                     viewModel.runAutoNow { changed ->
                         scope.launch {
                             snackbarHost.showSnackbar(
-                                if (changed > 0) "$changed app(s) hibernée(s)"
-                                else "Rien à hiberner pour l'instant"
+                                if (changed > 0) context.getString(R.string.snack_changed, changed)
+                                else context.getString(R.string.snack_nothing_to_hibernate)
                             )
                         }
                     }
@@ -168,17 +170,14 @@ fun HibernateScreen(
                 ) {
                     // ----- Suggestions ----- //
                     if (suggestions.isNotEmpty()) {
-                        item { SectionHeader("Suggestions") }
+                        item { SectionHeader(stringResource(R.string.section_suggestions)) }
                         item {
                             FilledTonalButton(
                                 onClick = {
-                                    viewModel.applySuggestedAll { applied, blocked ->
+                                    viewModel.applySuggestedAll { applied, _ ->
                                         scope.launch {
                                             snackbarHost.showSnackbar(
-                                                if (blocked > 0)
-                                                    "$applied app(s) hibernée(s), $blocked refusée(s)"
-                                                else
-                                                    "$applied app(s) hibernée(s)"
+                                                context.getString(R.string.snack_changed, applied)
                                             )
                                         }
                                     }
@@ -187,7 +186,7 @@ fun HibernateScreen(
                                     .fillMaxWidth()
                                     .padding(horizontal = 20.dp, vertical = 4.dp)
                             ) {
-                                Text("Hiberner les ${suggestions.size} suggestions")
+                                Text(stringResource(R.string.hibernate_n_suggestions, suggestions.size))
                             }
                         }
                         items(suggestions, key = { "sugg-" + it.app.packageName }) { item ->
@@ -196,7 +195,7 @@ fun HibernateScreen(
                                 onTap = { detailItem = item },
                                 onHibernate = { lvl ->
                                     viewModel.applyLevel(item.app.packageName, lvl) { res ->
-                                        scope.launch { snackbarHost.showSnackbar(humanReadable(res)) }
+                                        scope.launch { snackbarHost.showSnackbar(humanReadable(context, res)) }
                                     }
                                 }
                             )
@@ -204,7 +203,7 @@ fun HibernateScreen(
                     }
 
                     // ----- Filtre + tri ----- //
-                    item { SectionHeader("Toutes les apps") }
+                    item { SectionHeader(stringResource(R.string.section_all_apps)) }
                     item {
                         FilterSortBar(
                             filter = filter,
@@ -221,7 +220,7 @@ fun HibernateScreen(
                             onTap = { detailItem = item },
                             onLevelChange = { lvl ->
                                 viewModel.applyLevel(item.app.packageName, lvl) { res ->
-                                    scope.launch { snackbarHost.showSnackbar(humanReadable(res)) }
+                                    scope.launch { snackbarHost.showSnackbar(humanReadable(context, res)) }
                                 }
                             }
                         )
@@ -247,7 +246,7 @@ fun HibernateScreen(
             onDismiss = { detailItem = null },
             onApplyLevel = { lvl ->
                 viewModel.applyLevel(item.app.packageName, lvl) { res ->
-                    scope.launch { snackbarHost.showSnackbar(humanReadable(res)) }
+                    scope.launch { snackbarHost.showSnackbar(humanReadable(context, res)) }
                 }
                 detailItem = null
             },
@@ -288,14 +287,13 @@ private fun HeroStatCard(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = if (hibernatedCount <= 1) "application hibernée"
-                               else "applications hibernées",
+                        text = pluralStringResource(R.plurals.hibernated_apps, hibernatedCount),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
                 if (hibernatedCount > 0) {
                     androidx.compose.material3.TextButton(onClick = onWakeAll) {
-                        Text("Tout réveiller")
+                        Text(stringResource(R.string.wake_all))
                     }
                 }
             }
@@ -312,14 +310,13 @@ private fun HeroStatCard(
                 ) {
                     Column {
                         Text(
-                            text = "≈ +${savings.dailyPercent.toInt()} % d'autonomie / jour",
+                            text = stringResource(R.string.savings_headline, savings.dailyPercent.toInt()),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = SignalOk
                         )
                         Text(
-                            text = "soit ~${savings.dailyMah} mAh économisés " +
-                                   "(≈ ${savings.extraStandbyMinutes} min de veille). Estimation.",
+                            text = stringResource(R.string.savings_detail, savings.dailyMah, savings.extraStandbyMinutes),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -327,7 +324,7 @@ private fun HeroStatCard(
                 }
             } else {
                 Text(
-                    text = "Wake-on-push activé via UnifiedPush",
+                    text = stringResource(R.string.wake_on_push_active),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -355,12 +352,12 @@ private fun AutoHibernationCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Auto-hibernation",
+                        text = stringResource(R.string.auto_hibernation),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "Hiberne automatiquement les apps inutilisées selon leur score.",
+                        text = stringResource(R.string.auto_hibernation_desc),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -372,7 +369,7 @@ private fun AutoHibernationCard(
                 onClick = onRunNow,
                 modifier = Modifier.align(Alignment.End)
             ) {
-                Text("Lancer une passe maintenant")
+                Text(stringResource(R.string.run_pass_now))
             }
         }
     }
@@ -425,10 +422,9 @@ private fun SuggestionCard(
                     ScoreBadge(item.score)
                 }
                 Text(
-                    text = "Inactive depuis ${item.score.daysSinceLastUse} jour" +
-                           (if (item.score.daysSinceLastUse > 1) "s" else "") +
+                    text = stringResource(R.string.inactive_days, item.score.daysSinceLastUse) +
                            if (item.score.backgroundBytesLast7d > 1024 * 1024)
-                               " · ${formatMb(item.score.backgroundBytesLast7d)} en background"
+                               " · ${formatMb(item.score.backgroundBytesLast7d)}"
                            else "",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -444,7 +440,7 @@ private fun SuggestionCard(
                     }
                 )
             }) {
-                Text("Hiberner")
+                Text(stringResource(R.string.hibernate_action))
             }
         }
     }
@@ -458,6 +454,7 @@ private fun FilterSortBar(
     onSortChange: (Sort) -> Unit
 ) {
     var sortMenuOpen by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -469,14 +466,14 @@ private fun FilterSortBar(
             FilterChip(
                 selected = filter == f,
                 onClick = { onFilterChange(f) },
-                label = { Text(filterLabel(f)) }
+                label = { Text(filterLabel(context, f)) }
             )
         }
         Spacer(Modifier.weight(1f))
         Box {
             AssistChip(
                 onClick = { sortMenuOpen = true },
-                label = { Text("Tri: " + sortLabel(sort)) }
+                label = { Text(stringResource(R.string.sort_prefix, sortLabel(context, sort))) }
             )
             DropdownMenu(
                 expanded = sortMenuOpen,
@@ -484,7 +481,7 @@ private fun FilterSortBar(
             ) {
                 Sort.entries.forEach { s ->
                     DropdownMenuItem(
-                        text = { Text(sortLabel(s)) },
+                        text = { Text(sortLabel(context, s)) },
                         onClick = { onSortChange(s); sortMenuOpen = false }
                     )
                 }
@@ -500,6 +497,7 @@ private fun AppHibernationRow(
     onLevelChange: (HibernationLevel) -> Unit
 ) {
     var menuOpen by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -518,8 +516,8 @@ private fun AppHibernationRow(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = if (item.score.daysSinceLastUse == 0) "Active aujourd'hui"
-                       else "Inactive depuis ${item.score.daysSinceLastUse}j",
+                text = if (item.score.daysSinceLastUse == 0) stringResource(R.string.active_today)
+                       else stringResource(R.string.inactive_days, item.score.daysSinceLastUse),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -528,7 +526,7 @@ private fun AppHibernationRow(
         if (item.isProtected) {
             Icon(
                 imageVector = Icons.Outlined.Lock,
-                contentDescription = "Protégée",
+                contentDescription = stringResource(R.string.protected_label),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
@@ -537,7 +535,7 @@ private fun AppHibernationRow(
             Box {
                 AssistChip(
                     onClick = { menuOpen = true },
-                    label = { Text(levelLabel(item.currentLevel)) }
+                    label = { Text(levelLabel(context, item.currentLevel)) }
                 )
                 DropdownMenu(
                     expanded = menuOpen,
@@ -545,7 +543,7 @@ private fun AppHibernationRow(
                 ) {
                     HibernationLevel.entries.forEach { lvl ->
                         DropdownMenuItem(
-                            text = { Text(levelLabel(lvl)) },
+                            text = { Text(levelLabel(context, lvl)) },
                             onClick = { menuOpen = false; onLevelChange(lvl) }
                         )
                     }
@@ -609,50 +607,50 @@ private fun severityColor(s: NocivityBreakdown.Severity): Color = when (s) {
     NocivityBreakdown.Severity.CRITICAL -> SignalError
 }
 
-private fun filterLabel(f: Filter): String = when (f) {
-    Filter.ALL        -> "Toutes"
-    Filter.SUGGESTED  -> "Suggérées"
-    Filter.HIBERNATED -> "Hibernées"
-    Filter.PROTECTED  -> "Protégées"
+private fun filterLabel(ctx: android.content.Context, f: Filter): String = ctx.getString(when (f) {
+    Filter.ALL        -> R.string.filter_all
+    Filter.SUGGESTED  -> R.string.filter_suggested
+    Filter.HIBERNATED -> R.string.filter_hibernated
+    Filter.PROTECTED  -> R.string.filter_protected
+})
+
+private fun sortLabel(ctx: android.content.Context, s: Sort): String = ctx.getString(when (s) {
+    Sort.SCORE_DESC    -> R.string.sort_score
+    Sort.LAST_USED_ASC -> R.string.sort_inactivity
+    Sort.NAME_ASC      -> R.string.sort_name
+})
+
+internal fun levelLabel(ctx: android.content.Context, l: HibernationLevel): String = ctx.getString(when (l) {
+    HibernationLevel.OFF    -> R.string.level_off
+    HibernationLevel.SOFT   -> R.string.level_soft
+    HibernationLevel.MEDIUM -> R.string.level_medium
+    HibernationLevel.HARD   -> R.string.level_hard
+})
+
+internal fun protectionLabel(ctx: android.content.Context, reason: WhitelistReason): String = when (reason) {
+    is WhitelistReason.SystemApp              -> ctx.getString(R.string.prot_system)
+    is WhitelistReason.HoldsRole              -> ctx.getString(R.string.prot_role, reason.roleName.substringAfterLast('.'))
+    is WhitelistReason.ActiveInputMethod      -> ctx.getString(R.string.prot_ime)
+    is WhitelistReason.ActiveAccessibilityService -> ctx.getString(R.string.prot_a11y)
+    is WhitelistReason.ActiveVpn              -> ctx.getString(R.string.prot_vpn)
+    is WhitelistReason.DeviceAdmin            -> ctx.getString(R.string.prot_admin)
+    is WhitelistReason.LiveWallpaper          -> ctx.getString(R.string.prot_wallpaper)
+    is WhitelistReason.NotificationListener   -> ctx.getString(R.string.prot_notif_listener)
+    is WhitelistReason.DeclaresAutofill       -> ctx.getString(R.string.prot_autofill)
+    is WhitelistReason.CuratedSafetyList      -> ctx.getString(R.string.prot_curated)
+    is WhitelistReason.UserPinned             -> ctx.getString(R.string.prot_pinned)
 }
 
-private fun sortLabel(s: Sort): String = when (s) {
-    Sort.SCORE_DESC    -> "Score ↓"
-    Sort.LAST_USED_ASC -> "Inactivité ↓"
-    Sort.NAME_ASC      -> "Nom A→Z"
-}
-
-internal fun levelLabel(l: HibernationLevel): String = when (l) {
-    HibernationLevel.OFF    -> "Aucune"
-    HibernationLevel.SOFT   -> "Soft"
-    HibernationLevel.MEDIUM -> "Medium"
-    HibernationLevel.HARD   -> "Hard"
-}
-
-internal fun protectionLabel(reason: WhitelistReason): String = when (reason) {
-    is WhitelistReason.SystemApp              -> "Application système"
-    is WhitelistReason.HoldsRole              -> "Rôle critique : ${reason.roleName.substringAfterLast('.')}"
-    is WhitelistReason.ActiveInputMethod      -> "Clavier actif"
-    is WhitelistReason.ActiveAccessibilityService -> "Service d'accessibilité actif"
-    is WhitelistReason.ActiveVpn              -> "VPN actif"
-    is WhitelistReason.DeviceAdmin            -> "Administrateur de l'appareil"
-    is WhitelistReason.LiveWallpaper          -> "Fond d'écran animé"
-    is WhitelistReason.NotificationListener   -> "Lecteur de notifications"
-    is WhitelistReason.DeclaresAutofill       -> "Service d'auto-remplissage"
-    is WhitelistReason.CuratedSafetyList      -> "Liste de sécurité Volt"
-    is WhitelistReason.UserPinned             -> "Épinglée par vous"
-}
-
-private fun humanReadable(result: HibernationResult): String = when (result) {
-    HibernationResult.Success     -> "Politique appliquée"
-    HibernationResult.Unchanged   -> "Aucun changement"
-    is HibernationResult.Blocked  -> "Bloqué : ${protectionLabel(result.reason)}"
-    is HibernationResult.ShizukuUnavailable -> "Shizuku requis pour ${levelLabel(result.requested)}"
-    is HibernationResult.Failed   -> "Échec : ${result.error.javaClass.simpleName}"
+private fun humanReadable(ctx: android.content.Context, result: HibernationResult): String = when (result) {
+    HibernationResult.Success     -> ctx.getString(R.string.snack_policy_applied)
+    HibernationResult.Unchanged   -> ctx.getString(R.string.snack_no_change)
+    is HibernationResult.Blocked  -> ctx.getString(R.string.snack_blocked, protectionLabel(ctx, result.reason))
+    is HibernationResult.ShizukuUnavailable -> ctx.getString(R.string.snack_shizuku_required, levelLabel(ctx, result.requested))
+    is HibernationResult.Failed   -> ctx.getString(R.string.snack_failed, result.error.javaClass.simpleName)
 }
 
 private fun formatMb(bytes: Long): String {
     val mb = bytes.toDouble() / (1024.0 * 1024.0)
-    return if (mb >= 100.0) "${mb.toInt()} Mo"
-           else "%.1f Mo".format(mb)
+    return if (mb >= 100.0) "${mb.toInt()} MB"
+           else "%.1f MB".format(mb)
 }

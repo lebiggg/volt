@@ -3,7 +3,7 @@
 All notable changes to Volt are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.3.0-alpha] — unreleased
+## [0.3.0-alpha] — 2026-06-10
 
 ### Added
 - **Auto-hibernation now actually runs.** The decision engine is wired to the
@@ -12,6 +12,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - "Auto-hibernation" toggle on the Hibernate screen.
 - `BootReceiver` — opt-in service start after device reboot (off by default).
 - "Start on boot" toggle in Settings → Behavior.
+- **Full internationalization** — English is now the default language, with
+  French translation (`values-fr`). Every user-facing string is externalized.
 - GitHub Actions CI (build + unit tests on every push/PR).
 - `CONTRIBUTING.md`, issue templates, changelog.
 

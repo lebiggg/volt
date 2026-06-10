@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Volt</string>
+
+    <string name="tab_dashboard">Tableau</string>
+    <string name="tab_push">Push</string>
+    <string name="tab_hibernate">Hibernate</string>
+
+    <string name="dashboard_tagline">Optimisation énergétique respectueuse de la vie privée.</string>
+    <string name="settings_title">Réglages</string>
+    <string name="setup_required">Configuration requise</string>
+    <string name="setup_subtitle">Volt nécessite ces accès pour fonctionner pleinement. Aucun ne quitte votre appareil.</string>
+    <string name="perm_usage_title">Accès à l\'historique d\'utilisation</string>
+    <string name="perm_usage_desc">Indispensable pour observer l\'activité des apps en arrière-plan.</string>
+    <string name="perm_battery_title">Ignorer l\'optimisation de batterie</string>
+    <string name="perm_battery_desc">Empêche Android de tuer le service Volt après quelques heures.</string>
+    <string name="perm_notif_title">Notifications</string>
+    <string name="perm_notif_desc">Notification persistante du service (catégorie minimale).</string>
+    <string name="shizuku_title">Shizuku</string>
+    <string name="shizuku_desc_not_installed">Requis pour l\'hibernation. Disponible sur F-Droid, sans root.</string>
+    <string name="shizuku_desc_not_running">Installé mais arrêté. Démarrez-le via le débogage sans fil.</string>
+    <string name="shizuku_desc_not_granted">En cours d\'exécution — autorisez Volt à l\'utiliser.</string>
+    <string name="shizuku_desc_ready">Opérationnel. L\'hibernation est pleinement fonctionnelle.</string>
+    <string name="action_grant">Accorder</string>
+    <string name="action_install">Installer</string>
+    <string name="action_open">Ouvrir</string>
+    <string name="action_authorize">Autoriser</string>
+    <string name="service_active">Service actif</string>
+    <string name="service_inactive">Service inactif</string>
+    <string name="service_active_desc">Le moteur Volt protège votre batterie.</string>
+    <string name="service_inactive_desc">Activez Volt pour commencer.</string>
+    <plurals name="restricted_apps">
+        <item quantity="one">application restreinte</item>
+        <item quantity="other">applications restreintes</item>
+    </plurals>
+    <string name="deep_sleep_savings">Économies actives via Deep Sleep</string>
+
+    <string name="hibernate_subtitle">Restreint automatiquement les apps inutilisées. Les notifications UnifiedPush réveillent les apps hibernées à la livraison.</string>
+    <plurals name="hibernated_apps">
+        <item quantity="one">application hibernée</item>
+        <item quantity="other">applications hibernées</item>
+    </plurals>
+    <string name="wake_all">Tout réveiller</string>
+    <string name="savings_headline">≈ +%1$d%% d\'autonomie / jour</string>
+    <string name="savings_detail">soit ~%1$d mAh économisés (≈ %2$d min de veille). Estimation.</string>
+    <string name="wake_on_push_active">Wake-on-push activé via UnifiedPush</string>
+    <string name="auto_hibernation">Auto-hibernation</string>
+    <string name="auto_hibernation_desc">Hiberne automatiquement les apps inutilisées selon leur score.</string>
+    <string name="run_pass_now">Lancer une passe maintenant</string>
+    <string name="section_suggestions">Suggestions</string>
+    <string name="hibernate_n_suggestions">Hiberner les %1$d suggestions</string>
+    <string name="section_all_apps">Toutes les apps</string>
+    <string name="inactive_days">Inactive depuis %1$d j</string>
+    <string name="active_today">Active aujourd\'hui</string>
+    <string name="hibernate_action">Hiberner</string>
+    <string name="protected_label">Protégée</string>
+
+    <string name="snack_auto_on_changed">Auto activée — %1$d app(s) hibernée(s)</string>
+    <string name="snack_auto_on">Auto activée</string>
+    <string name="snack_changed">%1$d app(s) hibernée(s)</string>
+    <string name="snack_nothing_to_hibernate">Rien à hiberner pour l\'instant</string>
+    <string name="snack_woke">%1$d app(s) réveillée(s)</string>
+    <string name="snack_nothing_to_wake">Aucune app à réveiller</string>
+    <string name="snack_blocked">Bloqué : %1$s</string>
+    <string name="snack_shizuku_required">Shizuku requis pour %1$s</string>
+    <string name="snack_policy_applied">Politique appliquée</string>
+    <string name="snack_no_change">Aucun changement</string>
+    <string name="snack_failed">Échec : %1$s</string>
+
+    <string name="level_off">Aucune</string>
+    <string name="level_soft">Soft</string>
+    <string name="level_medium">Medium</string>
+    <string name="level_hard">Hard</string>
+    <string name="level_off_desc">Aucune restriction. L\'app fonctionne normalement.</string>
+    <string name="level_soft_desc">Bucket RESTRICTED. Aucun force-stop.</string>
+    <string name="level_medium_desc">RESTRICTED + force-stop quand l\'écran s\'éteint (Shizuku).</string>
+    <string name="level_hard_desc">RESTRICTED + force-stop périodique toutes les 6h (Shizuku).</string>
+
+    <string name="filter_all">Toutes</string>
+    <string name="filter_suggested">Suggérées</string>
+    <string name="filter_hibernated">Hibernées</string>
+    <string name="filter_protected">Protégées</string>
+    <string name="sort_prefix">Tri : %1$s</string>
+    <string name="sort_score">Score ↓</string>
+    <string name="sort_inactivity">Inactivité ↓</string>
+    <string name="sort_name">Nom A→Z</string>
+
+    <string name="prot_system">Application système</string>
+    <string name="prot_role">Rôle critique : %1$s</string>
+    <string name="prot_ime">Clavier actif</string>
+    <string name="prot_a11y">Service d\'accessibilité actif</string>
+    <string name="prot_vpn">VPN actif</string>
+    <string name="prot_admin">Administrateur de l\'appareil</string>
+    <string name="prot_wallpaper">Fond d\'écran animé</string>
+    <string name="prot_notif_listener">Lecteur de notifications</string>
+    <string name="prot_autofill">Service d\'auto-remplissage</string>
+    <string name="prot_curated">Liste de sécurité Volt</string>
+    <string name="prot_pinned">Épinglée par vous</string>
+
+    <string name="app_protected">Application protégée</string>
+    <string name="nocivity_score">Score de nocivité : %1$d / 100</string>
+    <string name="hibernation_level">Niveau d\'hibernation</string>
+    <string name="comp_inactivity">Inactivité</string>
+    <string name="comp_background">Ratio background</string>
+    <string name="comp_wakeups">Réveils CPU</string>
+    <string name="comp_network">Réseau background</string>
+    <string name="comp_battery">Impact batterie</string>
+    <string name="pin_title">Épingler</string>
+    <string name="pin_desc">Protège manuellement cette app de toute hibernation auto.</string>
+    <string name="apply">Appliquer</string>
+
+    <string name="shizuku_card_enable_hard">Activer le niveau HARD</string>
+    <string name="shizuku_card_not_installed_desc">Shizuku permet à Volt de mettre en hibernation profonde les apps les plus gourmandes, sans root. Disponible sur F-Droid.</string>
+    <string name="shizuku_card_install">Installer Shizuku</string>
+    <string name="shizuku_card_start_title">Démarrer Shizuku</string>
+    <string name="shizuku_card_start_desc">Shizuku est installé mais son service n\'est pas démarré. Ouvrez l\'app et suivez la procédure ADB ou root.</string>
+    <string name="shizuku_card_open">Ouvrir Shizuku</string>
+    <string name="shizuku_card_grant_title">Autoriser Volt dans Shizuku</string>
+    <string name="shizuku_card_grant_desc">Shizuku tourne — il vous reste à autoriser Volt à utiliser les commandes privilégiées.</string>
+    <string name="shizuku_card_request">Demander l\'autorisation</string>
+    <string name="shizuku_card_recheck">Revérifier</string>
+
+    <string name="push_title">Serveur Push</string>
+    <string name="push_subtitle">Renseignez l\'URL WebSocket de votre distributeur UnifiedPush (Gotify, Ntfy, NextPush…). TLS 1.3 requis.</string>
+    <string name="push_url_label">URL du serveur</string>
+    <string name="push_url_error">L\'URL doit commencer par wss://</string>
+    <string name="save">Enregistrer</string>
+    <string name="push_status_connected">Connecté</string>
+    <string name="push_status_connected_desc">Tunnel WebSocket actif.</string>
+    <string name="push_status_connecting">Connexion…</string>
+    <string name="push_status_connecting_desc">Négociation TLS en cours.</string>
+    <string name="push_status_disconnected">Déconnecté</string>
+    <string name="push_status_disconnected_desc">Aucune connexion active.</string>
+    <string name="push_status_waiting">En attente</string>
+    <string name="push_status_waiting_desc">Reconnexion dans %1$ds (backoff exponentiel).</string>
+    <string name="push_status_error">Erreur</string>
+
+    <string name="settings_appearance">Apparence</string>
+    <string name="settings_theme">Thème</string>
+    <string name="theme_system">Système</string>
+    <string name="theme_light">Clair</string>
+    <string name="theme_dark">Sombre</string>
+    <string name="settings_dynamic_color">Couleurs dynamiques</string>
+    <string name="settings_dynamic_color_desc">Material You — suit le fond d\'écran (Android 12+).</string>
+    <string name="settings_thresholds">Seuils d\'auto-hibernation</string>
+    <string name="settings_thresholds_desc">Score de nocivité à partir duquel chaque niveau s\'applique automatiquement.</string>
+    <string name="settings_behavior">Comportement</string>
+    <string name="settings_boot_title">Démarrer au démarrage</string>
+    <string name="settings_boot_desc">Relance le service Volt après un redémarrage de l\'appareil.</string>
+    <string name="settings_about">À propos</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_license">Licence</string>
+    <string name="settings_source">Code source sur GitHub</string>
+</resources>
