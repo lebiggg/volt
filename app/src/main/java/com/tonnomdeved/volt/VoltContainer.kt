@@ -2,6 +2,7 @@ package com.tonnomdeved.volt
 
 import android.app.usage.UsageStatsManager
 import android.content.Context
+import com.tonnomdeved.volt.data.hibernation.AutoHibernationRunner
 import com.tonnomdeved.volt.data.hibernation.HibernationController
 import com.tonnomdeved.volt.data.hibernation.HibernationDecisionEngine
 import com.tonnomdeved.volt.data.hibernation.HibernationRepository
@@ -56,5 +57,10 @@ class VoltContainer(applicationContext: Context) {
             shizuku = shizukuGateway,
             usageStatsManager = usageStatsManager
         )
+    }
+
+    // ---------- Auto-hibernation (chaînon DecisionEngine → Controller) ---------- //
+    val autoHibernationRunner: AutoHibernationRunner by lazy {
+        AutoHibernationRunner(appContext, decisionEngine, hibernationController)
     }
 }

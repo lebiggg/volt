@@ -38,6 +38,9 @@
     <!-- Whitelist Doze pour FGS longue durée -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
+    <!-- Démarrage opt-in du service au boot (désactivé par défaut) -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <application
         android:name=".VoltApplication"
         android:label="Volt"
@@ -88,6 +91,20 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
+
+        <!--
+            Receiver de boot — démarre le service uniquement si l'utilisateur
+            a activé l'option dans les réglages (opt-in strict).
+        -->
+        <receiver
+            android:name=".system.BootReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <!--
             Shizuku content provider — déclaré par la dépendance

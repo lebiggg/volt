@@ -39,6 +39,8 @@ class VoltPreferences(private val context: Context) {
         val THRESHOLD_MEDIUM = intPreferencesKey("threshold_medium")
         val THRESHOLD_HARD = intPreferencesKey("threshold_hard")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+        val AUTO_HIBERNATION = booleanPreferencesKey("auto_hibernation")
+        val START_ON_BOOT = booleanPreferencesKey("start_on_boot")
     }
 
     // ---------- Push ----------
@@ -72,4 +74,18 @@ class VoltPreferences(private val context: Context) {
             it[Keys.THRESHOLD_HARD] = hard.coerceIn(medium, 100)
         }
     }
+
+    // ---------- Automatisation ----------
+    val autoHibernationEnabled: Flow<Boolean> =
+        context.dataStore.data.map { it[Keys.AUTO_HIBERNATION] ?: false }
+    suspend fun setAutoHibernation(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.AUTO_HIBERNATION] = enabled }
+    }
+
+    val startOnBoot: Flow<Boolean> =
+        context.dataStore.data.map { it[Keys.START_ON_BOOT] ?: false }
+    suspend fun setStartOnBoot(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.START_ON_BOOT] = enabled }
+    }
 }
+

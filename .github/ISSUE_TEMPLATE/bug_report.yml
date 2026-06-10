@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a problem with Volt
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a bug.
+  - type: input
+    id: device
+    attributes:
+      label: Device & OS
+      placeholder: "Pixel 8 / GrapheneOS / Android 16"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Volt version
+      placeholder: "0.2.0-alpha (see Settings → About)"
+    validations:
+      required: true
+  - type: dropdown
+    id: shizuku
+    attributes:
+      label: Shizuku status
+      options:
+        - Running and authorized
+        - Installed but not running
+        - Not installed
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Hibernate tab
+        2. ...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs (optional)
+      description: "Output of: adb logcat -d -s VoltCore VoltHibernate VoltShizuku"
+      render: shell

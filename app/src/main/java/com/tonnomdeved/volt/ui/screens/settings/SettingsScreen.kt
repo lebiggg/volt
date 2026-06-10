@@ -51,10 +51,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 60)
     val hard: StateFlow<Int> = prefs.thresholdHard
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 85)
+    val startOnBoot: StateFlow<Boolean> = prefs.startOnBoot
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     fun setTheme(mode: VoltPreferences.ThemeMode) { viewModelScope.launch { prefs.setThemeMode(mode) } }
     fun setDynamic(enabled: Boolean) { viewModelScope.launch { prefs.setDynamicColor(enabled) } }
     fun setThresholds(s: Int, m: Int, h: Int) { viewModelScope.launch { prefs.setThresholds(s, m, h) } }
+    fun setStartOnBoot(enabled: Boolean) { viewModelScope.launch { prefs.setStartOnBoot(enabled) } }
 }
 
 @Composable
@@ -68,6 +71,7 @@ fun SettingsScreen(
     val soft    by viewModel.soft.collectAsStateWithLifecycle()
     val medium  by viewModel.medium.collectAsStateWithLifecycle()
     val hard    by viewModel.hard.collectAsStateWithLifecycle()
+    val onBoot  by viewModel.startOnBoot.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -112,6 +116,16 @@ fun SettingsScreen(
             ThresholdSlider("Soft",   soft,   0..100)   { viewModel.setThresholds(it, medium, hard) }
             ThresholdSlider("Medium", medium, soft..100) { viewModel.setThresholds(soft, it, hard) }
             ThresholdSlider("Hard",   hard,   medium..100) { viewModel.setThresholds(soft, medium, it) }
+        }
+
+        // ---- Comportement ----
+        SettingsCard(title = "Comportement") {
+            ToggleRow(
+                title = "Démarrer au démarrage",
+                subtitle = "Relance le service Volt après un redémarrage de l'appareil.",
+                checked = onBoot,
+                onChange = viewModel::setStartOnBoot
+            )
         }
 
         // ---- À propos ----

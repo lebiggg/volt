@@ -1,0 +1,30 @@
+name: Whitelist request
+description: Request an app be protected from hibernation by default
+labels: [whitelist]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this to request adding an app to the curated whitelist (2FA, password managers,
+        critical encrypted messengers, etc.). See CONTRIBUTING.md for the criteria.
+  - type: input
+    id: package
+    attributes:
+      label: Package name
+      placeholder: "com.example.app"
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source repository
+      placeholder: "https://github.com/..."
+    validations:
+      required: true
+  - type: textarea
+    id: justification
+    attributes:
+      label: Why must this app never be hibernated?
+      placeholder: "Loses real-time 2FA push codes when force-stopped."
+    validations:
+      required: true

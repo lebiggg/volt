@@ -78,6 +78,7 @@ fun HibernateScreen(
     val hibCount     by viewModel.hibernatedCount.collectAsStateWithLifecycle()
     val shizukuState by viewModel.shizukuAvailability.collectAsStateWithLifecycle()
     val savings      by viewModel.savings.collectAsStateWithLifecycle()
+    val autoEnabled  by viewModel.autoEnabled.collectAsStateWithLifecycle()
 
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -118,6 +119,30 @@ fun HibernateScreen(
                             snackbarHost.showSnackbar(
                                 if (woke > 0) "$woke app(s) réveillée(s)"
                                 else "Aucune app à réveiller"
+                            )
+                        }
+                    }
+                }
+            )
+
+            AutoHibernationCard(
+                enabled = autoEnabled,
+                onToggle = { on ->
+                    viewModel.setAutoHibernation(on) { changed ->
+                        if (on) scope.launch {
+                            snackbarHost.showSnackbar(
+                                if (changed > 0) "Auto activée — $changed app(s) hibernée(s)"
+                                else "Auto activée"
+                            )
+                        }
+                    }
+                },
+                onRunNow = {
+                    viewModel.runAutoNow { changed ->
+                        scope.launch {
+                            snackbarHost.showSnackbar(
+                                if (changed > 0) "$changed app(s) hibernée(s)"
+                                else "Rien à hiberner pour l'instant"
                             )
                         }
                     }
@@ -306,6 +331,48 @@ private fun HeroStatCard(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AutoHibernationCard(
+    enabled: Boolean,
+    onToggle: (Boolean) -> Unit,
+    onRunNow: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = "Auto-hibernation",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "Hiberne automatiquement les apps inutilisées selon leur score.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(checked = enabled, onCheckedChange = onToggle)
+            }
+            Spacer(Modifier.height(8.dp))
+            androidx.compose.material3.TextButton(
+                onClick = onRunNow,
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Lancer une passe maintenant")
             }
         }
     }

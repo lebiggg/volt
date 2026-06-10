@@ -11,6 +11,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.tonnomdeved.volt.BuildConfig
 import com.tonnomdeved.volt.VoltApplication
+import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
 
 /**
@@ -41,16 +42,29 @@ class HibernationWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val controller = (applicationContext as VoltApplication)
-            .container.hibernationController
+        val container = (applicationContext as VoltApplication).container
+        val prefs = com.tonnomdeved.volt.data.VoltPreferences(applicationContext)
 
         return runCatching {
-            val applied = controller.applyAllPolicies()
+            // 1) Si l'auto-hibernation est activée, on lance d'abord une passe
+            //    de décision (DecisionEngine) avec les seuils configurés.
+            val autoEnabled = prefs.autoHibernationEnabled.first()
+            if (autoEnabled) {
+                val thresholds = HibernationDecisionEngine.Thresholds(
+                    softAbove = prefs.thresholdSoft.first(),
+                    mediumAbove = prefs.thresholdMedium.first(),
+                    hardAbove = prefs.thresholdHard.first()
+                )
+                val changed = container.autoHibernationRunner.run(thresholds)
+                if (BuildConfig.DEBUG) Log.d(TAG, "auto-hibernation: $changed changed")
+            }
+
+            // 2) Réapplique toutes les politiques actives (anti-dérive du bucket).
+            val applied = container.hibernationController.applyAllPolicies()
             if (BuildConfig.DEBUG) Log.d(TAG, "sweep applied=$applied policies")
             Result.success()
         }.getOrElse { e ->
             if (BuildConfig.DEBUG) Log.w(TAG, "sweep failed", e)
-            // Retry avec backoff intégré WorkManager (~30s, doublant)
             Result.retry()
         }
     }

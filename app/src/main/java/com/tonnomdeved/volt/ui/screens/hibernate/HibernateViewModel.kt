@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -186,6 +187,43 @@ class HibernateViewModel(application: Application) : AndroidViewModel(applicatio
             loadAll()
             onDone(woke)
         }
+    }
+
+    private val prefs = com.tonnomdeved.volt.data.VoltPreferences(application)
+
+    val autoEnabled: StateFlow<Boolean> = prefs.autoHibernationEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    /** Active/désactive l'auto-hibernation et lance une passe immédiate si activée. */
+    fun setAutoHibernation(enabled: Boolean, onDone: (changed: Int) -> Unit) {
+        viewModelScope.launch {
+            prefs.setAutoHibernation(enabled)
+            if (enabled) {
+                val changed = runAutoPass()
+                loadAll()
+                onDone(changed)
+            } else {
+                onDone(0)
+            }
+        }
+    }
+
+    /** Lance une passe d'auto-hibernation manuelle (bouton « Lancer maintenant »). */
+    fun runAutoNow(onDone: (changed: Int) -> Unit) {
+        viewModelScope.launch {
+            val changed = runAutoPass()
+            loadAll()
+            onDone(changed)
+        }
+    }
+
+    private suspend fun runAutoPass(): Int {
+        val thresholds = com.tonnomdeved.volt.data.hibernation.HibernationDecisionEngine.Thresholds(
+            softAbove = prefs.thresholdSoft.first(),
+            mediumAbove = prefs.thresholdMedium.first(),
+            hardAbove = prefs.thresholdHard.first()
+        )
+        return container.autoHibernationRunner.run(thresholds)
     }
 
     /** Pin = userForceProtect. Mutuellement exclusif avec userForceHibernate. */
