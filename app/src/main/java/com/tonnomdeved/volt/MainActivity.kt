@@ -1,9 +1,12 @@
 package com.tonnomdeved.volt
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
@@ -15,25 +18,30 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.tonnomdeved.volt.data.VoltPreferences
 import com.tonnomdeved.volt.ui.navigation.VoltDestination
 import com.tonnomdeved.volt.ui.screens.dashboard.DashboardScreen
 import com.tonnomdeved.volt.ui.screens.hibernate.HibernateScreen
 import com.tonnomdeved.volt.ui.screens.push.PushConfigScreen
+import com.tonnomdeved.volt.ui.screens.settings.SettingsScreen
 import com.tonnomdeved.volt.ui.theme.VoltTheme
 
+private const val SETTINGS_ROUTE = "settings"
+private const val GITHUB_URL = "https://github.com/lebiggg/volt"
+
 /**
- * Point d'entrée UI unique.
- *
- * Le `MainActivity` est volontairement minimaliste : il n'orchestre que la
- * navigation et le theme. Toute logique réseau / service est confinée dans
- * les ViewModels ou le `BatteryCommandService`.
+ * Point d'entrée UI unique. Orchestre uniquement navigation + thème.
+ * Le thème lit les préférences DataStore et réagit en direct.
  */
 class MainActivity : ComponentActivity() {
 
@@ -41,7 +49,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            VoltTheme {
+            val context = LocalContext.current
+            val prefs = remember { VoltPreferences(context.applicationContext) }
+            val themeMode by prefs.themeMode
+                .collectAsStateWithLifecycle(VoltPreferences.ThemeMode.SYSTEM)
+            val dynamicColor by prefs.dynamicColor.collectAsStateWithLifecycle(true)
+
+            val dark = when (themeMode) {
+                VoltPreferences.ThemeMode.SYSTEM -> isSystemInDarkTheme()
+                VoltPreferences.ThemeMode.LIGHT  -> false
+                VoltPreferences.ThemeMode.DARK   -> true
+            }
+
+            VoltTheme(darkTheme = dark, dynamicColor = dynamicColor) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.surface
@@ -58,6 +78,7 @@ private fun VoltApp() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
+    val context = LocalContext.current
 
     Scaffold(
         bottomBar = {
@@ -86,27 +107,35 @@ private fun VoltApp() {
             }
         }
     ) { innerPadding ->
-        VoltNavHost(navController = navController, innerPadding = innerPadding)
-    }
-}
-
-@Composable
-private fun VoltNavHost(
-    navController: androidx.navigation.NavHostController,
-    innerPadding: PaddingValues
-) {
-    NavHost(
-        navController = navController,
-        startDestination = VoltDestination.Dashboard.route
-    ) {
-        composable(VoltDestination.Dashboard.route) {
-            DashboardScreen(contentPadding = innerPadding)
-        }
-        composable(VoltDestination.Push.route) {
-            PushConfigScreen(contentPadding = innerPadding)
-        }
-        composable(VoltDestination.Hibernate.route) {
-            HibernateScreen(contentPadding = innerPadding)
+        NavHost(
+            navController = navController,
+            startDestination = VoltDestination.Dashboard.route
+        ) {
+            composable(VoltDestination.Dashboard.route) {
+                DashboardScreen(
+                    contentPadding = innerPadding,
+                    onOpenSettings = { navController.navigate(SETTINGS_ROUTE) }
+                )
+            }
+            composable(VoltDestination.Push.route) {
+                PushConfigScreen(contentPadding = innerPadding)
+            }
+            composable(VoltDestination.Hibernate.route) {
+                HibernateScreen(contentPadding = innerPadding)
+            }
+            composable(SETTINGS_ROUTE) {
+                SettingsScreen(
+                    contentPadding = innerPadding,
+                    onOpenGithub = {
+                        runCatching {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(GITHUB_URL))
+                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                        }
+                    }
+                )
+            }
         }
     }
 }

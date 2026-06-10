@@ -8,6 +8,7 @@ import com.tonnomdeved.volt.data.VoltStateBus
 import com.tonnomdeved.volt.data.hibernation.HibernationLevel
 import com.tonnomdeved.volt.data.hibernation.HibernationPolicy
 import com.tonnomdeved.volt.data.hibernation.HibernationResult
+import com.tonnomdeved.volt.data.hibernation.SavingsEstimator
 import com.tonnomdeved.volt.data.hibernation.nocivity.NocivityBreakdown
 import com.tonnomdeved.volt.data.hibernation.shizuku.ShizukuGateway
 import com.tonnomdeved.volt.data.hibernation.whitelist.WhitelistReason
@@ -72,6 +73,18 @@ class HibernateViewModel(application: Application) : AndroidViewModel(applicatio
     val suggestions: StateFlow<List<AppHibernationItem>> =
         items.map { list -> deriveSuggestions(list) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Estimation d'économie batterie, recalculée à chaque changement de politique. */
+    val savings: StateFlow<SavingsEstimator.Savings> =
+        items.map { list ->
+            SavingsEstimator.estimate(
+                list.filter { it.currentLevel.isActive() }
+                    .map { it.currentLevel to it.score }
+            )
+        }.stateIn(
+            viewModelScope, SharingStarted.WhileSubscribed(5_000),
+            SavingsEstimator.estimate(emptyList())
+        )
 
     init {
         refreshShizukuAvailability()
@@ -163,6 +176,15 @@ class HibernateViewModel(application: Application) : AndroidViewModel(applicatio
             }
             loadAll()
             onSummary(applied, blocked)
+        }
+    }
+
+    /** Réveille toutes les apps hibernées d'un coup (panic button). */
+    fun wakeAll(onDone: (woke: Int) -> Unit) {
+        viewModelScope.launch {
+            val woke = controller.wakeAll()
+            loadAll()
+            onDone(woke)
         }
     }
 

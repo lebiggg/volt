@@ -77,6 +77,7 @@ fun HibernateScreen(
     val sort         by viewModel.sort.collectAsStateWithLifecycle()
     val hibCount     by viewModel.hibernatedCount.collectAsStateWithLifecycle()
     val shizukuState by viewModel.shizukuAvailability.collectAsStateWithLifecycle()
+    val savings      by viewModel.savings.collectAsStateWithLifecycle()
 
     val snackbarHost = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -108,7 +109,20 @@ fun HibernateScreen(
                 )
             }
 
-            HeroStatCard(hibernatedCount = hibCount)
+            HeroStatCard(
+                hibernatedCount = hibCount,
+                savings = savings,
+                onWakeAll = {
+                    viewModel.wakeAll { woke ->
+                        scope.launch {
+                            snackbarHost.showSnackbar(
+                                if (woke > 0) "$woke app(s) réveillée(s)"
+                                else "Aucune app à réveiller"
+                            )
+                        }
+                    }
+                }
+            )
 
             // ----- Onboarding Shizuku ----- //
             AnimatedVisibility(visible = shizukuState != com.tonnomdeved.volt.data.hibernation.shizuku.ShizukuGateway.Availability.READY) {
@@ -225,7 +239,11 @@ fun HibernateScreen(
 // ============================================================== //
 
 @Composable
-private fun HeroStatCard(hibernatedCount: Int) {
+private fun HeroStatCard(
+    hibernatedCount: Int,
+    savings: com.tonnomdeved.volt.data.hibernation.SavingsEstimator.Savings,
+    onWakeAll: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -236,23 +254,59 @@ private fun HeroStatCard(hibernatedCount: Int) {
         )
     ) {
         Column(Modifier.padding(20.dp)) {
-            Text(
-                text = hibernatedCount.toString(),
-                style = MaterialTheme.typography.displayLarge,
-                fontWeight = FontWeight.Light,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = if (hibernatedCount <= 1) "application hibernée"
-                       else "applications hibernées",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = "Wake-on-push activé via UnifiedPush",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(verticalAlignment = Alignment.Bottom) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = hibernatedCount.toString(),
+                        style = MaterialTheme.typography.displayLarge,
+                        fontWeight = FontWeight.Light,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = if (hibernatedCount <= 1) "application hibernée"
+                               else "applications hibernées",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+                if (hibernatedCount > 0) {
+                    androidx.compose.material3.TextButton(onClick = onWakeAll) {
+                        Text("Tout réveiller")
+                    }
+                }
+            }
+
+            // Estimation d'économie batterie (indicative, jamais présentée comme exacte)
+            if (savings.appCount > 0 && savings.dailyPercent >= 0.5) {
+                Spacer(Modifier.height(12.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(SignalOk.copy(alpha = 0.12f))
+                        .padding(14.dp)
+                ) {
+                    Column {
+                        Text(
+                            text = "≈ +${savings.dailyPercent.toInt()} % d'autonomie / jour",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = SignalOk
+                        )
+                        Text(
+                            text = "soit ~${savings.dailyMah} mAh économisés " +
+                                   "(≈ ${savings.extraStandbyMinutes} min de veille). Estimation.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    text = "Wake-on-push activé via UnifiedPush",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

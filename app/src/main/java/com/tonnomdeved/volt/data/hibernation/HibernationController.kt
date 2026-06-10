@@ -223,6 +223,25 @@ class HibernationController(
     suspend fun getPolicy(packageName: String): HibernationPolicy? =
         repository.getPolicy(packageName)
 
+    /**
+     * Réveille **toutes** les apps hibernées d'un coup — soupape de sécurité
+     * (« panic button »). Promeut chaque app en ACTIVE et supprime sa politique.
+     *
+     * Retourne le nombre d'apps réveillées. Idempotent (no-op si rien d'actif).
+     */
+    suspend fun wakeAll(): Int {
+        val active = repository.getAllPolicies().filter { it.level.isActive() }
+        var woke = 0
+        active.forEach { policy ->
+            applyStandbyBucket(policy.packageName, HibernationLevel.OFF)
+                .onSuccess {
+                    repository.delete(policy.packageName)
+                    woke++
+                }
+        }
+        return woke
+    }
+
     // ============================================================== //
     // Helpers privés
     // ============================================================== //
