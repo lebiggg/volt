@@ -1,0 +1,12 @@
+Volt est le successeur FOSS de Greenify — un gestionnaire intelligent d'hibernation d'applications pour GrapheneOS et Android soucieux de la vie privée, sans root.
+
+Fonctionnalités :
+* Hiberne automatiquement les apps inutilisées selon un score de nocivité transparent de 0 à 100 (inactivité, ratio background, réveils CPU, réseau background, impact batterie).
+* Whitelist automatique 5 couches : protège par défaut les apps système, rôles critiques, claviers, services d'accessibilité, gestionnaires de mots de passe, apps 2FA et VPN.
+* Trois niveaux d'hibernation (Soft / Medium / Hard) via Shizuku — sans root.
+* Wake-on-push : les notifications UnifiedPush réveillent les apps hibernées à la livraison, pour économiser la batterie sans rater de message.
+* Tuile Réglages rapides, balayage périodique, estimation d'économie de batterie.
+
+Zéro télémétrie. Zéro tracker. 100% FOSS (GPL-3.0).
+
+Note : sur Android 16, Shizuku est requis (l'OS a verrouillé la permission concernée). Volt vous guide pour la configuration unique.

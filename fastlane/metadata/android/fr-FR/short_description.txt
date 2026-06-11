@@ -1,0 +1,1 @@
+Gestionnaire d'hibernation privacy-first pour GrapheneOS
