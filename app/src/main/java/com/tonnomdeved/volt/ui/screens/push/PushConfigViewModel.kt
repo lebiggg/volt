@@ -29,6 +29,12 @@ class PushConfigViewModel(application: Application) : AndroidViewModel(applicati
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000),
                  VoltStateBus.PushStatus.Disconnected)
 
+    /** Nombre d'apps actuellement enregistrées auprès du distributeur UnifiedPush. */
+    val registrationCount: StateFlow<Int> =
+        (application as com.tonnomdeved.volt.VoltApplication)
+            .container.pushRegistrationRepository.count
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
     init {
         viewModelScope.launch {
             prefs.pushServerUrl.collect { persisted ->

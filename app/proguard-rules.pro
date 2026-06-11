@@ -82,3 +82,10 @@
 
 # --- TileService instancié par SystemUI ---
 -keep class com.tonnomdeved.volt.system.VoltTileService { *; }
+
+# --- Receivers instanciés par le système (boot + UnifiedPush distributor) ---
+-keep class com.tonnomdeved.volt.system.BootReceiver { *; }
+-keep class com.tonnomdeved.volt.system.UnifiedPushReceiver { *; }
+
+# --- Room push DB ---
+-keep class com.tonnomdeved.volt.data.push.persistence.** { *; }

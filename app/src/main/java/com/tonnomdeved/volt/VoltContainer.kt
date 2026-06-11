@@ -11,6 +11,8 @@ import com.tonnomdeved.volt.data.hibernation.nocivity.NocivityScorer
 import com.tonnomdeved.volt.data.hibernation.persistence.HibernationDatabase
 import com.tonnomdeved.volt.data.hibernation.shizuku.ShizukuGateway
 import com.tonnomdeved.volt.data.hibernation.whitelist.WhitelistResolver
+import com.tonnomdeved.volt.data.push.PushRegistrationRepository
+import com.tonnomdeved.volt.data.push.persistence.PushDatabase
 
 /**
  * Service locator minimaliste — pas de Hilt, pas de Koin.
@@ -32,6 +34,12 @@ class VoltContainer(applicationContext: Context) {
     }
     val hibernationRepository: HibernationRepository by lazy {
         HibernationRepository(hibernationDatabase.hibernationDao())
+    }
+
+    // ---------- Persistance UnifiedPush ---------- //
+    val pushDatabase: PushDatabase by lazy { PushDatabase.build(appContext) }
+    val pushRegistrationRepository: PushRegistrationRepository by lazy {
+        PushRegistrationRepository(pushDatabase.pushRegistrationDao())
     }
 
     // ---------- Services système ---------- //

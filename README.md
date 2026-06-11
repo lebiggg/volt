@@ -44,11 +44,16 @@ A scanner that ranks the apps that woke your phone and used the network while yo
 - **One-tap hibernate** straight from a culprit row.
 - Honest degradation: without Shizuku, wakeup data is shown as "?" and only foreground + network signals are used.
 
-### 3. 📡 UnifiedPush hub — *experimental*
+### 3. 📡 UnifiedPush distributor
 
-Persistent WebSocket (TLS 1.3, full-jitter backoff, zero payload logging) to the push server of your choice (NextPush, Gotify, ntfy…).
+Volt is a real UnifiedPush **distributor**: other apps can pick it as their push provider.
 
-> ⚠️ **Current state**: the WebSocket channel and routing work, but the UnifiedPush registration protocol (`REGISTER`/`UNREGISTER`) is **not implemented yet**. Volt can't declare itself as a system distributor to other apps yet. Treat this as a technical demo, not a production distributor.
+- Implements the distributor handshake — `REGISTER` → `NEW_ENDPOINT`, `UNREGISTER` → `UNREGISTERED`, `REGISTRATION_FAILED` when no server is configured.
+- Persistent WebSocket (TLS 1.3, full-jitter backoff, zero payload logging) to the push server of your choice (NextPush, Gotify, ntfy…).
+- Incoming messages (`<token>:<message>` over the WebSocket) are routed to the right app and delivered with `FLAG_INCLUDE_STOPPED_PACKAGES` — the **wake-on-push** synergy with Hibernate.
+- Endpoint convention: `wss://host/ws` → `https://host/UP?token=<token>`. Your push server POSTs to that endpoint and forwards `<token>:<message>` over the WebSocket.
+
+> The full distributor protocol is validated on-device (REGISTER/UNREGISTER round-trip, endpoint generation, token→app delivery). Interop with the full range of connector apps is still being tested — treat as alpha.
 
 ---
 
@@ -184,7 +189,8 @@ Missing a 2FA / password manager / encrypted messenger in [`CuratedWhitelist.kt`
 - [x] Internationalization (English + French)
 - [x] Opt-in start on boot
 - [x] Forensics — nightly wakeup analyzer
-- [ ] UnifiedPush — full `REGISTER`/`UNREGISTER` protocol
+- [x] UnifiedPush distributor — `REGISTER`/`UNREGISTER` handshake
+- [ ] UnifiedPush — broad connector-app interop testing
 
 ---
 

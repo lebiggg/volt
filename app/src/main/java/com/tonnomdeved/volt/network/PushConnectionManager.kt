@@ -142,17 +142,17 @@ class PushConnectionManager(
      * Routage interne du push. Le payload n'est jamais inspecté avant d'être
      * forwardé au Service, et n'est jamais loggué.
      *
-     * Format MVP : `targetPackage:messageContent` (sera remplacé par un parser
-     * JSON / binaire UnifiedPush v2 dans une itération future).
+     * Format wire : `<token>:<message>` (UnifiedPush) — rétro-compatible avec
+     * `<package>:<message>`. La résolution token→package se fait dans le Service
+     * (qui a accès au repository des registrations).
      */
     private fun routePush(payload: String) {
-        val parts = payload.split(":", limit = 2)
-        if (parts.size != 2) return
-        val targetPkg = parts[0]
-        val msg = parts[1]
+        val parsed = com.tonnomdeved.volt.data.push.UnifiedPushProtocol.parseWirePayload(payload)
+            ?: return
+        val (key, msg) = parsed
 
         val intent = Intent(BatteryCommandService.ACTION_DELIVER_PUSH).apply {
-            putExtra(BatteryCommandService.EXTRA_TARGET_PACKAGE, targetPkg)
+            putExtra(BatteryCommandService.EXTRA_TARGET_PACKAGE, key)
             putExtra(BatteryCommandService.EXTRA_MESSAGE_DATA, msg)
             // Restriction critique : broadcast purement intra-process.
             setPackage(appContext.packageName)

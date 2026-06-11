@@ -107,6 +107,22 @@
         </receiver>
 
         <!--
+            Distributeur UnifiedPush — reçoit les REGISTER/UNREGISTER des apps
+            connecteurs. exported=true obligatoire (les connecteurs sont des
+            apps tierces). L'identité de l'app appelante est vérifiée via le
+            creatorPackage du PendingIntent (voir UnifiedPushReceiver).
+        -->
+        <receiver
+            android:name=".system.UnifiedPushReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="org.unifiedpush.android.distributor.REGISTER" />
+                <action android:name="org.unifiedpush.android.distributor.UNREGISTER" />
+            </intent-filter>
+        </receiver>
+
+        <!--
             Shizuku content provider — déclaré par la dépendance
             dev.rikka.shizuku:provider. Permet à Shizuku de détecter Volt
             et à Volt d'invoquer Shizuku.newProcess() en runtime.

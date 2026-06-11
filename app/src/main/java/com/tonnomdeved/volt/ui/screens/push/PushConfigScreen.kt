@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.tonnomdeved.volt.R
@@ -47,6 +48,7 @@ fun PushConfigScreen(
 ) {
     val urlDraft by viewModel.urlDraft.collectAsStateWithLifecycle()
     val status   by viewModel.pushStatus.collectAsStateWithLifecycle()
+    val regCount by viewModel.registrationCount.collectAsStateWithLifecycle()
     val canSave  = viewModel.isUrlValid(urlDraft)
 
     Column(
@@ -95,6 +97,33 @@ fun PushConfigScreen(
         Spacer(Modifier.height(4.dp))
 
         ConnectionStatusCard(status)
+
+        // Compteur d'apps enregistrées auprès du distributeur UnifiedPush.
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            Column(Modifier.padding(20.dp)) {
+                Text(
+                    text = regCount.toString(),
+                    style = MaterialTheme.typography.displayLarge,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Light,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = pluralStringResource(R.plurals.registered_apps, regCount),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = stringResource(R.string.push_distributor_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }
 

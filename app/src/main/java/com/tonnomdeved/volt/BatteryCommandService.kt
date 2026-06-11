@@ -173,21 +173,27 @@ class BatteryCommandService : Service() {
     // pièce maîtresse : il permet de réveiller une app force-stoppée
     // (niveau MEDIUM/HARD) qui ne recevrait sinon aucun broadcast.
     // ============================================================== //
-    private fun handleDelivery(targetPackage: String, messageData: String) {
+    private fun handleDelivery(targetKey: String, messageData: String) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return
 
-        // Coalesce : un nouveau push pour le même package annule la
-        // ré-application précédente. Évite les "race" entre deux pushs
-        // rapprochés qui programmeraient deux rehibernate simultanés.
-        pendingDeepSleepJobs[targetPackage]?.cancel()
+        // Coalesce sur la clé reçue (token ou package).
+        pendingDeepSleepJobs[targetKey]?.cancel()
 
         val job = serviceScope.launch {
+            // 0) Résolution token → package (UnifiedPush). Repli : la clé EST
+            //    déjà un package (rétro-compat avec l'ancien format wire).
+            val token = targetKey
+            val container = (applicationContext as VoltApplication).container
+            val targetPackage = container.pushRegistrationRepository
+                .packageForToken(token) ?: token
+
             // 1) WAKE — promotion bucket → ACTIVE (no-op si app non hibernée)
             val wakeState = hibernation.wakeForPush(targetPackage)
 
-            // 2) BROADCAST UnifiedPush — avec FLAG_INCLUDE_STOPPED_PACKAGES (CRITIQUE)
+            // 2) BROADCAST UnifiedPush — conforme spec + FLAG_INCLUDE_STOPPED_PACKAGES (CRITIQUE)
             val pushIntent = Intent(UNIFIEDPUSH_MESSAGE_ACTION).apply {
                 putExtra("message", messageData)
+                putExtra("token", token)
                 setPackage(targetPackage)
                 addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
             }
@@ -199,9 +205,9 @@ class BatteryCommandService : Service() {
             if (!powerManager.isInteractive && wakeState.wasHibernated()) {
                 hibernation.rehibernate(wakeState)
             }
-            pendingDeepSleepJobs.remove(targetPackage)
+            pendingDeepSleepJobs.remove(targetKey)
         }
-        pendingDeepSleepJobs[targetPackage] = job
+        pendingDeepSleepJobs[targetKey] = job
     }
 
     // ============================================================== //

@@ -3,6 +3,28 @@
 All notable changes to Volt are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.0-alpha] — 2026-06-11
+
+### Added
+- **Real UnifiedPush distributor.** Volt now implements the distributor side of
+  the protocol — other apps can register Volt as their push provider:
+  - `UnifiedPushReceiver` handles `REGISTER` → `NEW_ENDPOINT` and
+    `UNREGISTER` → `UNREGISTERED`, with `REGISTRATION_FAILED` when no server
+    URL is configured.
+  - Secure caller identification via the PendingIntent `creatorPackage`,
+    with `EXTRA_APPLICATION` fallback.
+  - Room-backed token↔package registry; endpoint generation
+    (`wss://host/ws` → `https://host/UP?token=…`).
+  - Incoming `<token>:<message>` over the WebSocket resolves token→app and
+    delivers with `FLAG_INCLUDE_STOPPED_PACKAGES` (wake-on-push).
+- Registered-apps counter on the Push screen.
+- Validated end-to-end on a Pixel 8 / Android 16 (REGISTER + UNREGISTER
+  round-trip, correct endpoint, DB persistence).
+- 12 new JVM tests (endpoint generation + wire payload parsing).
+
+### Changed
+- The UnifiedPush module is no longer labeled "experimental".
+
 ## [0.4.0-alpha] — 2026-06-11
 
 ### Added

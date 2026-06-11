@@ -147,6 +147,11 @@
     <string name="push_status_waiting">En attente</string>
     <string name="push_status_waiting_desc">Reconnexion dans %1$ds (backoff exponentiel).</string>
     <string name="push_status_error">Erreur</string>
+    <plurals name="registered_apps">
+        <item quantity="one">app enregistrée</item>
+        <item quantity="other">apps enregistrées</item>
+    </plurals>
+    <string name="push_distributor_hint">Apps ayant choisi Volt comme distributeur UnifiedPush.</string>
 
     <string name="settings_appearance">Apparence</string>
     <string name="settings_theme">Thème</string>
