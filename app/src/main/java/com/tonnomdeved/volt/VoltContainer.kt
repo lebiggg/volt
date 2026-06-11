@@ -2,6 +2,7 @@ package com.tonnomdeved.volt
 
 import android.app.usage.UsageStatsManager
 import android.content.Context
+import com.tonnomdeved.volt.data.forensics.ForensicsAnalyzer
 import com.tonnomdeved.volt.data.hibernation.AutoHibernationRunner
 import com.tonnomdeved.volt.data.hibernation.HibernationController
 import com.tonnomdeved.volt.data.hibernation.HibernationDecisionEngine
@@ -62,5 +63,10 @@ class VoltContainer(applicationContext: Context) {
     // ---------- Auto-hibernation (chaînon DecisionEngine → Controller) ---------- //
     val autoHibernationRunner: AutoHibernationRunner by lazy {
         AutoHibernationRunner(appContext, decisionEngine, hibernationController)
+    }
+
+    // ---------- Forensics (analyseur de réveils nocturnes) ---------- //
+    val forensicsAnalyzer: ForensicsAnalyzer by lazy {
+        ForensicsAnalyzer(appContext, shizukuGateway)
     }
 }

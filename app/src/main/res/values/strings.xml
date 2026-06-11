@@ -6,6 +6,20 @@
     <string name="tab_dashboard">Dashboard</string>
     <string name="tab_push">Push</string>
     <string name="tab_hibernate">Hibernate</string>
+    <string name="tab_forensics">Forensics</string>
+
+    <!-- Forensics -->
+    <string name="forensics_subtitle">See which apps woke your phone and used the network while you slept.</string>
+    <string name="forensics_window">Window: last %1$d hours</string>
+    <string name="forensics_scan">Scan</string>
+    <string name="forensics_empty">Tap Scan to analyze background activity.</string>
+    <string name="forensics_summary">%1$d active apps · %2$d wakeups total</string>
+    <string name="forensics_quiet_night">Quiet window — nothing notable.</string>
+    <string name="forensics_no_wakelock">Wakeup data needs Shizuku. Showing foreground &amp; network only.</string>
+    <string name="forensics_metric_wakeups">%1$d wakeups</string>
+    <string name="forensics_metric_foreground">%1$d foreground</string>
+    <string name="forensics_metric_network">%1$d MB bg</string>
+    <string name="forensics_hibernate_failed">Could not hibernate (Shizuku?)</string>
 
     <!-- Dashboard -->
     <string name="dashboard_tagline">Privacy-first battery optimization.</string>

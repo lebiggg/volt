@@ -32,6 +32,7 @@ import androidx.navigation.compose.rememberNavController
 import com.tonnomdeved.volt.data.VoltPreferences
 import com.tonnomdeved.volt.ui.navigation.VoltDestination
 import com.tonnomdeved.volt.ui.screens.dashboard.DashboardScreen
+import com.tonnomdeved.volt.ui.screens.forensics.ForensicsScreen
 import com.tonnomdeved.volt.ui.screens.hibernate.HibernateScreen
 import com.tonnomdeved.volt.ui.screens.push.PushConfigScreen
 import com.tonnomdeved.volt.ui.screens.settings.SettingsScreen
@@ -123,6 +124,9 @@ private fun VoltApp() {
             }
             composable(VoltDestination.Hibernate.route) {
                 HibernateScreen(contentPadding = innerPadding)
+            }
+            composable(VoltDestination.Forensics.route) {
+                ForensicsScreen(contentPadding = innerPadding)
             }
             composable(SETTINGS_ROUTE) {
                 SettingsScreen(

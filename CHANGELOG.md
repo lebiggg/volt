@@ -3,6 +3,21 @@
 All notable changes to Volt are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.0-alpha] — 2026-06-11
+
+### Added
+- **Forensics module** — a new 4th tab that answers "what woke my phone and
+  used the network overnight?". Scans a configurable window (4/8/12/24h) and
+  ranks apps by an impact score combining:
+  - CPU/radio wakeups attributed per app (parsed from `dumpsys batterystats`
+    via Shizuku — `wakeupap=` history, validated against real Android 16),
+  - foreground transitions (UsageStatsManager),
+  - background network bytes (NetworkStatsManager).
+- One-tap "Hibernate" straight from a culprit row.
+- Honest degradation: without Shizuku, wakeup data is omitted (shown as "?")
+  and only foreground + network signals are used.
+- 11 new JVM tests (impact scoring + dumpsys UID token decoding).
+
 ## [0.3.0-alpha] — 2026-06-10
 
 ### Added

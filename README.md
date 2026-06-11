@@ -35,7 +35,16 @@ Automatically detects unused, battery-draining apps, hibernates them in graduate
 - **Wake-on-push**: `FLAG_INCLUDE_STOPPED_PACKAGES` delivers the push even to a force-stopped app — something Greenify never did cleanly.
 - **Battery savings estimate**, **"wake all"** panic button, **Quick Settings tile**.
 
-### 2. 📡 UnifiedPush hub — *experimental*
+### 2. 🔎 Forensics — "why did my battery drain overnight?"
+
+A scanner that ranks the apps that woke your phone and used the network while you slept, over a configurable window (4 / 8 / 12 / 24h).
+
+- **Per-app wakeup attribution** parsed from `dumpsys batterystats` via Shizuku (`wakeupap=` history) — validated against real Android 16 output.
+- **Foreground transitions** (UsageStatsManager) and **background network** (NetworkStatsManager) folded into one 0–100 impact score.
+- **One-tap hibernate** straight from a culprit row.
+- Honest degradation: without Shizuku, wakeup data is shown as "?" and only foreground + network signals are used.
+
+### 3. 📡 UnifiedPush hub — *experimental*
 
 Persistent WebSocket (TLS 1.3, full-jitter backoff, zero payload logging) to the push server of your choice (NextPush, Gotify, ntfy…).
 
@@ -174,8 +183,8 @@ Missing a 2FA / password manager / encrypted messenger in [`CuratedWhitelist.kt`
 - [x] Auto-hibernation wired to the periodic sweep
 - [x] Internationalization (English + French)
 - [x] Opt-in start on boot
+- [x] Forensics — nightly wakeup analyzer
 - [ ] UnifiedPush — full `REGISTER`/`UNREGISTER` protocol
-- [ ] Forensics — nightly wakelock analyzer
 
 ---
 

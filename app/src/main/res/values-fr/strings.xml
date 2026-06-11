@@ -5,6 +5,19 @@
     <string name="tab_dashboard">Tableau</string>
     <string name="tab_push">Push</string>
     <string name="tab_hibernate">Hibernate</string>
+    <string name="tab_forensics">Forensics</string>
+
+    <string name="forensics_subtitle">Voyez quelles apps ont réveillé votre téléphone et consommé du réseau pendant votre sommeil.</string>
+    <string name="forensics_window">Fenêtre : %1$d dernières heures</string>
+    <string name="forensics_scan">Analyser</string>
+    <string name="forensics_empty">Touchez Analyser pour examiner l\'activité en arrière-plan.</string>
+    <string name="forensics_summary">%1$d apps actives · %2$d réveils au total</string>
+    <string name="forensics_quiet_night">Fenêtre calme — rien de notable.</string>
+    <string name="forensics_no_wakelock">Les données de réveil nécessitent Shizuku. Affichage premier plan &amp; réseau uniquement.</string>
+    <string name="forensics_metric_wakeups">%1$d réveils</string>
+    <string name="forensics_metric_foreground">%1$d premier plan</string>
+    <string name="forensics_metric_network">%1$d Mo arr-plan</string>
+    <string name="forensics_hibernate_failed">Hibernation impossible (Shizuku ?)</string>
 
     <string name="dashboard_tagline">Optimisation énergétique respectueuse de la vie privée.</string>
     <string name="settings_title">Réglages</string>

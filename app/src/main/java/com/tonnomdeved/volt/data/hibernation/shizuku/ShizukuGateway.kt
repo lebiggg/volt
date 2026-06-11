@@ -135,6 +135,46 @@ class ShizukuGateway(private val context: Context) {
         }
 
     /**
+     * Exécute une commande shell et **capture sa sortie standard**.
+     * Utilisé par le module Forensics pour parser `dumpsys batterystats`.
+     *
+     * Retourne le stdout complet, ou Result.failure si Shizuku indisponible.
+     * Limite de sécurité : on tronque à ~4 Mo pour éviter d'exploser la mémoire
+     * sur une sortie dumpsys géante.
+     */
+    suspend fun captureShell(vararg args: String): Result<String> =
+        withContext(Dispatchers.IO) {
+            if (checkAvailability() != Availability.READY) {
+                return@withContext Result.failure(IllegalStateException("Shizuku non disponible"))
+            }
+            runCatching {
+                val method = Shizuku::class.java.getDeclaredMethod(
+                    "newProcess",
+                    Array<String>::class.java,
+                    Array<String>::class.java,
+                    String::class.java
+                ).apply { isAccessible = true }
+                val process = method.invoke(null, args, null, null) as Process
+                val output = process.inputStream.bufferedReader().use { reader ->
+                    val sb = StringBuilder()
+                    val buf = CharArray(8192)
+                    var total = 0
+                    val cap = 4 * 1024 * 1024
+                    while (true) {
+                        val n = reader.read(buf)
+                        if (n < 0) break
+                        if (total < cap) { sb.append(buf, 0, n); total += n }
+                    }
+                    sb.toString()
+                }
+                process.waitFor()
+                output
+            }.onFailure { e ->
+                if (BuildConfig.DEBUG) Log.w(TAG, "captureShell failed: ${args.joinToString(" ")}", e)
+            }
+        }
+
+    /**
      * Demande la permission Shizuku.
      * Doit être appelée depuis une Activity vivante (sinon le dialog ne s'affiche pas).
      */

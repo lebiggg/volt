@@ -133,7 +133,7 @@ fun SettingsScreen(
 
         // ---- À propos ----
         SettingsCard(title = stringResource(R.string.settings_about)) {
-            InfoRow(stringResource(R.string.settings_version), "0.3.0-alpha")
+            InfoRow(stringResource(R.string.settings_version), "0.4.0-alpha")
             InfoRow(stringResource(R.string.settings_license), "GPL-3.0")
             Spacer(Modifier.height(8.dp))
             Row(
